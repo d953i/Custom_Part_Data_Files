@@ -1,4 +1,4 @@
-# Xilinx Vivado Custom Part Data Files
+# Xilinx Vivado Custom Part Data Files (in CVS format)
 
 Collection of memory configuration files for Xilinx Vivado along with example design for a few boards.
 
@@ -24,13 +24,13 @@ In Vivado TCL console:<br>
 ```cd ~/Custom_Part_Data_Files/Boards/Xilinx_BCU1525/```<br>
 ```source ./example.tcl```
 
-# BCU1525 quad-channel example block diagram
+# BCU1525 quad-channel ddr4 example block diagram
 ![Vivado_Block_Diagram](Images/BCU1525_Quad_DDR4_BlockDiagram.PNG?raw=true "Vivado Block Diagram")
 
-# BCU1525 quad-channel example memory map 
+# BCU1525 quad-channel dd4 example memory map 
 ![Vivado_Memory_Map](Images/BCU1525_Quad_DDR4_MemoryMap.PNG?raw=true "Vivado Memory Map")
 
-# BCU1525 quad-channel example calibration
+# BCU1525 quad-channel ddr4 example calibration
 ![Vivado_Calibration](Images/BCU1525_Quad_DDR4_Calibration.PNG?raw=true "Vivado Memory Calibration")
 
 # Useful links
