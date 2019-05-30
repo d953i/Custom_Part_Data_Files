@@ -1,20 +1,29 @@
---- /tools/Xilinx/Vivado/2018.3/data/ip/xilinx/mem_v1_4/csv/time_periods.csv_orig	2018-12-07 00:27:48.000000000 -0800
-+++ /tools/Xilinx/Vivado/2018.3/data/ip/xilinx/mem_v1_4/csv/time_periods.csv	2019-02-05 14:42:14.571440055 -0800
-@@ -455,7 +455,7 @@
- DDR4,DIMM,-2,E,Vnom,UltraScale,4,2,2,No,On,HP,Group 1,POD12,4:1,,,Full,Internal,No,,1333.33,1500,1600,,,,
- DDR4,DIMM,-2,E,Vnom,UltraScale,4,2,2,No,On,HP,Group 2,POD12,4:1,,,Full,Internal,No,,1333.33,1500,1600,,,,
- DDR4,DIMM,-2,E,Vnom,UltraScale,4,2,2,No,On,HP,Group 3,POD12,4:1,,,Full,Internal,No,,Too Slow,NA,1600,,,,
--DDR4,DIMM,-2,E,Vnom,UltraScale+,1,1,1,No,Off,HP,Group 1,POD12,4:1,,,Full,Internal,No,,2400.00,833,1600,,,,
-+DDR4,DIMM,-2,E,Vnom,UltraScale+,1,1,1,No,Off,HP,Group 1,POD12,4:1,,,Full,Internal,No,,2666.00,750,1600,,,,
- DDR4,DIMM,-2,E,Vnom,UltraScale+,1,1,1,No,Off,HP,Group 2,POD12,4:1,,,Full,Internal,No,,2133.33,938,1600,,,,
- DDR4,DIMM,-2,E,Vnom,UltraScale+,1,1,1,No,On,HP,Group 1,POD12,4:1,,,Full,Internal,No,,2133.33,938,1600,,,,
- DDR4,DIMM,-2,E,Vnom,UltraScale+,1,1,1,No,On,HP,Group 2,POD12,4:1,,,Full,Internal,No,,2133.33,938,1600,,,,
-@@ -505,7 +505,7 @@
- DDR4,DIMM,-2,I,Vnom,UltraScale,4,2,2,No,On,HP,Group 1,POD12,4:1,,,Full,Internal,No,,1333.33,1500,1600,,,,
- DDR4,DIMM,-2,I,Vnom,UltraScale,4,2,2,No,On,HP,Group 2,POD12,4:1,,,Full,Internal,No,,1333.33,1500,1600,,,,
- DDR4,DIMM,-2,I,Vnom,UltraScale,4,2,2,No,On,HP,Group 3,POD12,4:1,,,Full,Internal,No,,Too Slow,NA,1600,,,,
--DDR4,DIMM,-2,I,Vnom,UltraScale+,1,1,1,No,Off,HP,Group 1,POD12,4:1,,,Full,Internal,No,,2400.00,833,1600,,,,
-+DDR4,DIMM,-2,I,Vnom,UltraScale+,1,1,1,No,Off,HP,Group 1,POD12,4:1,,,Full,Internal,No,,2666.00,750,1600,,,,
- DDR4,DIMM,-2,I,Vnom,UltraScale+,1,1,1,No,Off,HP,Group 2,POD12,4:1,,,Full,Internal,No,,2133.33,938,1600,,,,
- DDR4,DIMM,-2,I,Vnom,UltraScale+,1,1,1,No,On,HP,Group 1,POD12,4:1,,,Full,Internal,No,,2133.33,938,1600,,,,
- DDR4,DIMM,-2,I,Vnom,UltraScale+,1,1,1,No,On,HP,Group 2,POD12,4:1,,,Full,Internal,No,,2133.33,938,1600,,,,
+*** /tools/Xilinx/Vivado/2019.1/data/ip/xilinx/mem_v1_4/csv/time_periods.csv	2019-05-30 09:48:03.451710578 -0700
+--- /tools/Xilinx/Vivado/2019.1/data/ip/xilinx/mem_v1_4/csv/time_periods.csv_orig	2019-05-24 16:51:00.000000000 -0700
+*************** DDR4,DIMM,-2,E,Vnom,UltraScale,4,2,2,No,
+*** 469,471 ****
+  DDR4,DIMM,-2,E,Vnom,UltraScale,4,2,2,No,On,HP,Group 3,POD12,4:1,,,Full,Internal,No,,Too Slow,NA,1600,,,,
+! DDR4,DIMM,-2,E,Vnom,UltraScale+,1,1,1,No,Off,HP,Group 1,POD12,4:1,,,Full,Internal,No,,2666.67,750,1600,,,,
+  DDR4,DIMM,-2,E,Vnom,UltraScale+,1,1,1,No,Off,HP,Group 2,POD12,4:1,,,Full,Internal,No,,2133.33,938,1600,,,,
+--- 469,471 ----
+  DDR4,DIMM,-2,E,Vnom,UltraScale,4,2,2,No,On,HP,Group 3,POD12,4:1,,,Full,Internal,No,,Too Slow,NA,1600,,,,
+! DDR4,DIMM,-2,E,Vnom,UltraScale+,1,1,1,No,Off,HP,Group 1,POD12,4:1,,,Full,Internal,No,,2400.00,833,1600,,,,
+  DDR4,DIMM,-2,E,Vnom,UltraScale+,1,1,1,No,Off,HP,Group 2,POD12,4:1,,,Full,Internal,No,,2133.33,938,1600,,,,
+*************** DDR4,DIMM,-2,I,Vnom,UltraScale,4,2,2,No,
+*** 519,521 ****
+  DDR4,DIMM,-2,I,Vnom,UltraScale,4,2,2,No,On,HP,Group 3,POD12,4:1,,,Full,Internal,No,,Too Slow,NA,1600,,,,
+! DDR4,DIMM,-2,I,Vnom,UltraScale+,1,1,1,No,Off,HP,Group 1,POD12,4:1,,,Full,Internal,No,,2666.67,750,1600,,,,
+  DDR4,DIMM,-2,I,Vnom,UltraScale+,1,1,1,No,Off,HP,Group 2,POD12,4:1,,,Full,Internal,No,,2133.33,938,1600,,,,
+--- 519,521 ----
+  DDR4,DIMM,-2,I,Vnom,UltraScale,4,2,2,No,On,HP,Group 3,POD12,4:1,,,Full,Internal,No,,Too Slow,NA,1600,,,,
+! DDR4,DIMM,-2,I,Vnom,UltraScale+,1,1,1,No,Off,HP,Group 1,POD12,4:1,,,Full,Internal,No,,2400.00,833,1600,,,,
+  DDR4,DIMM,-2,I,Vnom,UltraScale+,1,1,1,No,Off,HP,Group 2,POD12,4:1,,,Full,Internal,No,,2133.33,938,1600,,,,
+*************** DDR4,DIMM,-2,I,Vnom,UltraScale+,4,2,2,No
+*** 539,541 ****
+  DDR4,DIMM,-2,I,Vnom,UltraScale+,4,2,2,No,On,HP,Group 2,POD12,4:1,,,Full,Internal,No,,1600.00,1250,1600,,,,
+! DDR4,DIMM,-2L,E,Vnom,UltraScale+,1,1,1,No,Off,HP,Group 1,POD12,4:1,,,Full,Internal,No,,2666.67,750,1600,,,,
+  DDR4,DIMM,-2L,E,Vnom,UltraScale+,1,1,1,No,Off,HP,Group 2,POD12,4:1,,,Full,Internal,No,,2133.33,938,1600,,,,
+--- 539,541 ----
+  DDR4,DIMM,-2,I,Vnom,UltraScale+,4,2,2,No,On,HP,Group 2,POD12,4:1,,,Full,Internal,No,,1600.00,1250,1600,,,,
+! DDR4,DIMM,-2L,E,Vnom,UltraScale+,1,1,1,No,Off,HP,Group 1,POD12,4:1,,,Full,Internal,No,,2400.00,833,1600,,,,
+  DDR4,DIMM,-2L,E,Vnom,UltraScale+,1,1,1,No,Off,HP,Group 2,POD12,4:1,,,Full,Internal,No,,2133.33,938,1600,,,,
