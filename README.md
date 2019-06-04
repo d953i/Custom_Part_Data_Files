@@ -3,10 +3,11 @@
 Collection of memory configuration files for Xilinx Vivado along with example design for a few boards.
 
 # DDR4 Memory
-- UDIMM  Crutial Ballistix Sport BLS4G4D240FSB (CT40A512M8RH-075E component)
-- UDIMM  Crutial Ballistix Sport BLS8G4D240FSB (CT40A512M8RH-075E component)
-- SODIMM Crutial Ballistix Sport BLS4G4S26BFSD (CT40A512M8WE-75H component)
-- SODIMM Micron MTA8ATF1G64HZ (MT40A1G8WE-075E component)
+- UDIMM  Crutial Ballistix Sport BLS4G4D240FSB  (CT40A512M8RH-075E component) - 4GB
+- UDIMM  Crutial Ballistix Sport BLS8G4D240FSB  (CT40A512M8RH-075E component) - 8GB
+- UDIMM  Crutial Ballistix Sport BLS16G4D26BFSB (CT40A1G8WE-75H:D  component) - 16GB
+- SODIMM Crutial Ballistix Sport BLS4G4S26BFSD  (CT40A512M8WE-75H component)  - 4GB
+- SODIMM Micron MTA8ATF1G64HZ (MT40A1G8WE-075E component) - 8GB
   
 # Example design for Ballistix 4GB UDIMM's
 - Bittware CVP13
