@@ -1,5 +1,5 @@
 
-set ProjectName example
+set ProjectName vcu1525_ballistix
 set ProjectFolder ./$ProjectName
 
 
@@ -19,6 +19,8 @@ if {[file exists "$ProjectFolder"]} {
     file delete -force $ProjectFolder
 }
 
+set scriptPath [file dirname [file normalize [info script]]]
+set sourceRoot [join [lrange [file split [file dirname [info script]]] 0 end-2] "/"]
 
 create_project $ProjectName $ProjectFolder -part xcvu9p-fsgd2104-2L-e
 
@@ -27,16 +29,18 @@ create_bd_design "bd"
 set_param synth.maxThreads 8
 set_param general.maxThreads 12
 
-import_files -norecurse ./../../Memory/Crutial_Ballistix_Sport/BLS4G4D240FSB.csv
-import_files -fileset constrs_1 -norecurse ./VCU1525_DIMM0.xdc
-import_files -fileset constrs_1 -norecurse ./VCU1525_DIMM1.xdc
-import_files -fileset constrs_1 -norecurse ./VCU1525_DIMM2.xdc
-import_files -fileset constrs_1 -norecurse ./VCU1525_DIMM3.xdc
-#add_files -fileset constrs_1 -norecurse ./VCU1525_DIMM0.xdc
-#add_files -fileset constrs_1 -norecurse ./VCU1525_DIMM1.xdc
-#add_files -fileset constrs_1 -norecurse ./VCU1525_DIMM2.xdc
-#add_files -fileset constrs_1 -norecurse ./VCU1525_DIMM3.xdc
+import_files -norecurse $sourceRoot/Memory/Crutial_Ballistix_Sport/BLS4G4D240FSB.csv
+import_files -fileset constrs_1 -norecurse $sourceRoot/Boards/Xilinx_VCU1525/VCU1525_DIMM0.xdc
+import_files -fileset constrs_1 -norecurse $sourceRoot/Boards/Xilinx_VCU1525/VCU1525_DIMM1.xdc
+import_files -fileset constrs_1 -norecurse $sourceRoot/Boards/Xilinx_VCU1525/VCU1525_DIMM2.xdc
+import_files -fileset constrs_1 -norecurse $sourceRoot/Boards/Xilinx_VCU1525/VCU1525_DIMM3.xdc
 
+#Uncomment to create local copy of files.
+#add_files -norecurse $sourceRoot/Memory/Crutial_Ballistix_Sport/BLS4G4D240FSB.csv
+#add_files -fileset constrs_1 -norecurse $sourceRoot/Boards/Xilinx_VCU1525/VCU1525_DIMM0.xdc	
+#add_files -fileset constrs_1 -norecurse $sourceRoot/Boards/Xilinx_VCU1525/VCU1525_DIMM1.xdc
+#add_files -fileset constrs_1 -norecurse $sourceRoot/Boards/Xilinx_VCU1525/VCU1525_DIMM2.xdc
+#add_files -fileset constrs_1 -norecurse $sourceRoot/Boards/Xilinx_VCU1525/VCU1525_DIMM3.xdc
 
 startgroup
 create_bd_cell -type ip -vlnv xilinx.com:ip:xdma:4.1 xdma_0

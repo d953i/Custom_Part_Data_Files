@@ -1,5 +1,5 @@
 
-set ProjectName example
+set ProjectName cvp13_ballistix
 set ProjectFolder ./$ProjectName
 
 #Remove unnecessary files.
@@ -18,6 +18,8 @@ if {[file exists "$ProjectFolder"]} {
     file delete -force $ProjectFolder
 }
 
+set scriptPath [file dirname [file normalize [info script]]]
+set sourceRoot [join [lrange [file split [file dirname [info script]]] 0 end-2] "/"]
 
 create_project $ProjectName $ProjectFolder -part xcvu13p-figd2104-2-e
 
@@ -26,11 +28,13 @@ create_bd_design "bd"
 set_param synth.maxThreads 8
 set_param general.maxThreads 12
 
-import_files -norecurse ./../../Memory/Crutial_Ballistix_Sport/BLS4G4D240FSB.csv
-import_files -fileset constrs_1 -norecurse ./CVP13_DIMM0.xdc
-import_files -fileset constrs_1 -norecurse ./CVP13_DIMM1.xdc
-#add_files -fileset constrs_1 -norecurse ./CVP13_DIMM0.xdc
-#add_files -fileset constrs_1 -norecurse ./CVP13_DIMM1.xdc
+import_files -norecurse $sourceRoot/Memory/Crutial_Ballistix_Sport/BLS4G4D240FSB.csv
+import_files -fileset constrs_1 -norecurse $sourceRoot/Boards/Bittware_CVP13/CVP13_DIMM0.xdc
+import_files -fileset constrs_1 -norecurse $sourceRoot/Boards/Bittware_CVP13/CVP13_DIMM1.xdc
+
+#Uncomment to create local copy of files.
+#add_files -fileset constrs_1 -norecurse $sourceRoot/Boards/Bittware_CVP13/CVP13_DIMM0.xdc
+#add_files -fileset constrs_1 -norecurse $sourceRoot/Boards/Bittware_CVP13/CVP13_DIMM1.xdc
 
 
 startgroup
