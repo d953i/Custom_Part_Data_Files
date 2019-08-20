@@ -22,7 +22,10 @@ if {[file exists "$ProjectFolder"]} {
 
 create_project $ProjectName $ProjectFolder -part xcvu9p-fsgd2104-2L-e
 
-create_bd_design "design_1"
+create_bd_design "bd"
+
+set_param synth.maxThreads 8
+set_param general.maxThreads 12
 
 import_files -norecurse ./../../Memory/Crutial_Ballistix_Sport/BLS4G4D240FSB.csv
 import_files -fileset constrs_1 -norecurse ./VCU1525_DIMM0.xdc
@@ -191,6 +194,6 @@ endgroup
 
 assign_bd_address
 
-make_wrapper -files [get_files ./$ProjectName/$ProjectName.srcs/sources_1/bd/design_1/design_1.bd] -top
-add_files -norecurse ./$ProjectName/$ProjectName.srcs/sources_1/bd/design_1/hdl/design_1_wrapper.v
+make_wrapper -files [get_files ./$ProjectName/$ProjectName.srcs/sources_1/bd/bd/bd.bd] -top
+add_files -norecurse ./$ProjectName/$ProjectName.srcs/sources_1/bd/bd/hdl/bd_wrapper.v
 

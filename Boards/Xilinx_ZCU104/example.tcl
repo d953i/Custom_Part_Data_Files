@@ -22,7 +22,10 @@ if {[file exists "$ProjectFolder"]} {
 create_project $ProjectName ./$ProjectName -part xczu7ev-ffvc1156-2-e
 set_property board_part xilinx.com:zcu104:part0:1.1 [current_project]
 
-create_bd_design "design_1"
+create_bd_design "bd"
+
+set_param synth.maxThreads 8
+set_param general.maxThreads 12
 
 import_files -norecurse ./../../Memory/Crutial_Ballistix_Sport/BLS4G4S26BFSD.csv
 import_files -norecurse ./../../Memory/Micron_MTA8ATF1G64HZ/MTA8ATF1G64HZ.csv
@@ -61,7 +64,7 @@ set_property range 4G [get_bd_addr_segs {zynq_ultra_ps_e_0/Data/SEG_ddr4_0_C0_DD
 add_files -fileset constrs_1 -norecurse ./ZCU104_SODIMM.xdc
 import_files -fileset constrs_1 ./ZCU104_SODIMM.xdc
 
-make_wrapper -files [get_files ./$ProjectName/$ProjectName.srcs/sources_1/bd/design_1/design_1.bd] -top
-add_files -norecurse ./$ProjectName/$ProjectName.srcs/sources_1/bd/design_1/hdl/design_1_wrapper.v
+make_wrapper -files [get_files ./$ProjectName/$ProjectName.srcs/sources_1/bd/bd/bd.bd] -top
+add_files -norecurse ./$ProjectName/$ProjectName.srcs/sources_1/bd/bd/hdl/bd_wrapper.v
 update_compile_order -fileset sources_1
 
