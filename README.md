@@ -22,7 +22,7 @@ Clone repo, go to your project directory and source TCL script from Vivado. For 
 ```git clone https://github.com/D953i/Custom_Part_Data_Files.git```
 
 In Vivado TCL console:<br>
-```source ../_github/Custom_Part_Data_Files/Boards/Xilinx_BCU1525/create_project.tcl
+```source ../_github/Custom_Part_Data_Files/Boards/Xilinx_BCU1525/create_project.tcl```
 
 # BCU1525 create project by using tcl script
 ![Vivado_Source_Script](Images/BCU1525_SourceScript.PNG?raw=true "Vivado Source Script Screenshot")
