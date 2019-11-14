@@ -1,7 +1,14 @@
 
-set ProjectName bcu1525_ballistix
-set ProjectFolder ./$ProjectName
+#Need apply patch to Xilinx MIG before can enable DDR4-2666 speed for DIMM/UDIMM.
+set MEM_SPEED 2666
 
+set ProjectName bcu1525_ballistix
+
+if {$MEM_SPEED == 2666} {
+   append ProjectName $MEM_SPEED
+}
+
+set ProjectFolder ./$ProjectName
 
 #Remove unnecessary files.
 set file_list [glob -nocomplain webtalk*.*]
@@ -86,6 +93,7 @@ set_property name C2_DDR4_0 [get_bd_intf_ports C0_DDR4_2]
 set_property name C3_DDR4_0 [get_bd_intf_ports C0_DDR4_3]
 endgroup
 
+if {$MEM_SPEED == 2666} {
 startgroup
 set_property -dict [list CONFIG.C0.DDR4_TimePeriod {833} CONFIG.C0.DDR4_InputClockPeriod {3332} CONFIG.C0.DDR4_CLKOUT0_DIVIDE {5}] [get_bd_cells ddr4_0]
 set_property -dict [list CONFIG.C0.DDR4_TimePeriod {833} CONFIG.C0.DDR4_InputClockPeriod {3332} CONFIG.C0.DDR4_CLKOUT0_DIVIDE {5}] [get_bd_cells ddr4_1]
@@ -101,11 +109,27 @@ set_property -dict [list CONFIG.C0.DDR4_MemoryType {UDIMMs} CONFIG.C0.DDR4_Memor
 set_property -dict [list CONFIG.C0.DDR4_MemoryType {UDIMMs} CONFIG.C0.DDR4_MemoryPart {BLS4G4D240FSB-2400} CONFIG.C0.DDR4_DataWidth {64}] [get_bd_cells ddr4_1]
 set_property -dict [list CONFIG.C0.DDR4_MemoryType {UDIMMs} CONFIG.C0.DDR4_MemoryPart {BLS4G4D240FSB-2400} CONFIG.C0.DDR4_DataWidth {64}] [get_bd_cells ddr4_2]
 set_property -dict [list CONFIG.C0.DDR4_MemoryType {UDIMMs} CONFIG.C0.DDR4_MemoryPart {BLS4G4D240FSB-2400} CONFIG.C0.DDR4_DataWidth {64}] [get_bd_cells ddr4_3]
-#set_property -dict [list CONFIG.C0.DDR4_MemoryType {UDIMMs} CONFIG.C0.DDR4_MemoryPart {BLS4G4D240FSB-2400} CONFIG.C0.DDR4_DataWidth {64} CONFIG.C0.DDR4_AxiDataWidth {512} CONFIG.C0.DDR4_AxiAddressWidth {32}] [get_bd_cells ddr4_0]
-#set_property -dict [list CONFIG.C0.DDR4_MemoryType {UDIMMs} CONFIG.C0.DDR4_MemoryPart {BLS4G4D240FSB-2400} CONFIG.C0.DDR4_DataWidth {64} CONFIG.C0.DDR4_AxiDataWidth {512} CONFIG.C0.DDR4_AxiAddressWidth {32}] [get_bd_cells ddr4_1]
-#set_property -dict [list CONFIG.C0.DDR4_MemoryType {UDIMMs} CONFIG.C0.DDR4_MemoryPart {BLS4G4D240FSB-2400} CONFIG.C0.DDR4_DataWidth {64} CONFIG.C0.DDR4_AxiDataWidth {512} CONFIG.C0.DDR4_AxiAddressWidth {32}] [get_bd_cells ddr4_2]
-#set_property -dict [list CONFIG.C0.DDR4_MemoryType {UDIMMs} CONFIG.C0.DDR4_MemoryPart {BLS4G4D240FSB-2400} CONFIG.C0.DDR4_DataWidth {64} CONFIG.C0.DDR4_AxiDataWidth {512} CONFIG.C0.DDR4_AxiAddressWidth {32}] [get_bd_cells ddr4_3]
+endgroup
+} else {
+startgroup
+set_property -dict [list CONFIG.C0.DDR4_TimePeriod {833} CONFIG.C0.DDR4_InputClockPeriod {3332} CONFIG.C0.DDR4_CLKOUT0_DIVIDE {5}] [get_bd_cells ddr4_0]
+set_property -dict [list CONFIG.C0.DDR4_TimePeriod {833} CONFIG.C0.DDR4_InputClockPeriod {3332} CONFIG.C0.DDR4_CLKOUT0_DIVIDE {5}] [get_bd_cells ddr4_1]
+set_property -dict [list CONFIG.C0.DDR4_TimePeriod {833} CONFIG.C0.DDR4_InputClockPeriod {3332} CONFIG.C0.DDR4_CLKOUT0_DIVIDE {5}] [get_bd_cells ddr4_2]
+set_property -dict [list CONFIG.C0.DDR4_TimePeriod {833} CONFIG.C0.DDR4_InputClockPeriod {3332} CONFIG.C0.DDR4_CLKOUT0_DIVIDE {5}] [get_bd_cells ddr4_3]
 
+set_property -dict [list CONFIG.C0.DDR4_CustomParts [lindex [get_files */BLS4G4D240FSB.csv] 0] CONFIG.C0.DDR4_isCustom {true}] [get_bd_cells ddr4_0]
+set_property -dict [list CONFIG.C0.DDR4_CustomParts [lindex [get_files */BLS4G4D240FSB.csv] 0] CONFIG.C0.DDR4_isCustom {true}] [get_bd_cells ddr4_1]
+set_property -dict [list CONFIG.C0.DDR4_CustomParts [lindex [get_files */BLS4G4D240FSB.csv] 0] CONFIG.C0.DDR4_isCustom {true}] [get_bd_cells ddr4_2]
+set_property -dict [list CONFIG.C0.DDR4_CustomParts [lindex [get_files */BLS4G4D240FSB.csv] 0] CONFIG.C0.DDR4_isCustom {true}] [get_bd_cells ddr4_3]
+
+set_property -dict [list CONFIG.C0.DDR4_MemoryType {UDIMMs} CONFIG.C0.DDR4_MemoryPart {BLS4G4D240FSB-2400} CONFIG.C0.DDR4_DataWidth {64}] [get_bd_cells ddr4_0]
+set_property -dict [list CONFIG.C0.DDR4_MemoryType {UDIMMs} CONFIG.C0.DDR4_MemoryPart {BLS4G4D240FSB-2400} CONFIG.C0.DDR4_DataWidth {64}] [get_bd_cells ddr4_1]
+set_property -dict [list CONFIG.C0.DDR4_MemoryType {UDIMMs} CONFIG.C0.DDR4_MemoryPart {BLS4G4D240FSB-2400} CONFIG.C0.DDR4_DataWidth {64}] [get_bd_cells ddr4_2]
+set_property -dict [list CONFIG.C0.DDR4_MemoryType {UDIMMs} CONFIG.C0.DDR4_MemoryPart {BLS4G4D240FSB-2400} CONFIG.C0.DDR4_DataWidth {64}] [get_bd_cells ddr4_3]
+endgroup
+}
+
+startgroup
 set_property -dict [list CONFIG.ADDN_UI_CLKOUT1_FREQ_HZ {100}] [get_bd_cells ddr4_0]
 set_property -dict [list CONFIG.ADDN_UI_CLKOUT1_FREQ_HZ {100}] [get_bd_cells ddr4_1]
 set_property -dict [list CONFIG.ADDN_UI_CLKOUT1_FREQ_HZ {100}] [get_bd_cells ddr4_2]
