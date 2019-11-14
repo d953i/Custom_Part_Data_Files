@@ -17,13 +17,15 @@ Collection of memory configuration files for Xilinx Vivado along with example de
 
 # BCU1525 quad-channel example usage
 
-Clone repo, go to board directory and source TCL script from Vivado. For example:<br>
+Clone repo, go to your project directory and source TCL script from Vivado. For example:<br>
 ```cd ~```<br>
 ```git clone https://github.com/D953i/Custom_Part_Data_Files.git```
 
 In Vivado TCL console:<br>
-```cd ~/Custom_Part_Data_Files/Boards/Xilinx_BCU1525/```<br>
-```source ./example.tcl```
+```source ../_github/Custom_Part_Data_Files/Boards/Xilinx_BCU1525/create_project.tcl
+
+# BCU1525 create project by using tcl script
+![Vivado_Source_Script](Images/BCU1525_SourceScript.PNG?raw=true "Vivado Source Script Screenshot")
 
 # BCU1525 quad-channel ddr4 example block diagram
 ![Vivado_Block_Diagram](Images/BCU1525_Quad_DDR4_BlockDiagram.PNG?raw=true "Vivado Block Diagram")
