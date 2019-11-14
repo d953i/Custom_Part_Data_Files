@@ -1,6 +1,6 @@
 
 #Need apply patch to Xilinx MIG before can enable DDR4-2666 speed for DIMM/UDIMM.
-set MEM_SPEED 2666
+set MEM_SPEED 2400
 
 set ProjectName zcu104_ballistix
 
