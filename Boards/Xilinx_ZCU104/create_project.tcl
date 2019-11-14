@@ -51,7 +51,7 @@ set_property name sodimm_refclk [get_bd_intf_ports C0_SYS_CLK_0]
 set_property CONFIG.FREQ_HZ 300000000 [get_bd_intf_ports /sodimm_refclk]
 endgroup
 
-if {$MEM_SPEED == 2666} {        
+if {$MEM_SPEED == 2666} {
 startgroup
 set_property -dict [list CONFIG.C0.DDR4_TimePeriod {750}] [get_bd_cells ddr4_0]
 set_property -dict [list CONFIG.C0.DDR4_CustomParts [lindex [get_files */BLS4G4S26BFSD.csv] 0] CONFIG.C0.DDR4_isCustom {true}] [get_bd_cells ddr4_0]
