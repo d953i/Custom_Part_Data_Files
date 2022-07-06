@@ -3,7 +3,7 @@
 Collection of memory configuration files for Xilinx Vivado along with example design for a few boards.
 
 # Xilinx Vivado Custom Part Data Files (in CVS format)
-Tested with Vivado version 2019.2
+Tested with Vivado version 2019.2 & 2022.1
 
 # DDR4 Memory
 - UDIMM  Crutial Ballistix Sport BLS4G4D240FSB  (CT40A512M8RH-075E component) - 4GB
