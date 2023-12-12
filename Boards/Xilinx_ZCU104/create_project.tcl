@@ -31,6 +31,10 @@ set sourceRoot [join [lrange [file split [file dirname [info script]]] 0 end-2] 
 #puts stdout [join [lrange [file split [file dirname [info script]]] 0 end-2] "/"]
 #return -code 1
 
+if {[string compare [version -short] 2023.2] != 0} {
+    return -code error [format "This script is for Vivado version 2023.2!"]
+}
+
 create_project $ProjectName ./$ProjectName -part xczu7ev-ffvc1156-2-e
 set_property board_part xilinx.com:zcu104:part0:1.1 [current_project]
 

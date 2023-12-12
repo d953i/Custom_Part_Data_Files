@@ -29,6 +29,10 @@ if {[file exists "$ProjectFolder"]} {
 set scriptPath [file dirname [file normalize [info script]]]
 set sourceRoot [join [lrange [file split [file dirname [info script]]] 0 end-2] "/"]
 
+if {[string compare [version -short] 2023.2] != 0} {
+    return -code error [format "This script is for Vivado version 2023.2!"]
+}
+
 create_project $ProjectName $ProjectFolder -part xcvu13p-figd2104-2-e
 
 create_bd_design "bd"
