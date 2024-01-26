@@ -193,6 +193,10 @@ set_property range 8G [get_bd_addr_segs {zynq_ultra_ps_e_0/Data/SEG_ddr4_pl_C0_D
 add_files -fileset constrs_1 -norecurse $sourceRoot/Boards/Xilinx_ZCU104/ZCU104_SODIMM.xdc
 import_files -fileset constrs_1 $sourceRoot/Boards/Xilinx_ZCU104/ZCU104_SODIMM.xdc
 
+add_files -fileset constrs_1 -norecurse $sourceRoot/Boards/Xilinx_ZCU104/ZCU104_TESTSTAND.xdc
+import_files -fileset constrs_1 $sourceRoot/Boards/Xilinx_ZCU104/ZCU104_TESTSTAND.xdc
+
+
 make_wrapper -files [get_files ./$ProjectName/$ProjectName.srcs/sources_1/bd/bd/bd.bd] -top
 add_files -norecurse ./$ProjectName/$ProjectName.srcs/sources_1/bd/bd/hdl/bd_wrapper.v
 update_compile_order -fileset sources_1
