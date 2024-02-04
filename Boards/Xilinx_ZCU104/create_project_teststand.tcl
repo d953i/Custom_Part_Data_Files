@@ -123,6 +123,8 @@ apply_bd_automation -rule xilinx.com:bd_rule:axi4 -config { Clk_master {Auto} Cl
 set_property -dict [list CONFIG.ADDN_UI_CLKOUT1_FREQ_HZ {100}] [get_bd_cells ddr4_pl]
 endgroup
 
+set_property -dict [list CONFIG.PSU__I2C0__PERIPHERAL__ENABLE {1} CONFIG.PSU__I2C0__PERIPHERAL__IO {MIO 10 .. 11}] [get_bd_cells zynq_ultra_ps_e_0]
+
 #HDMI TX
 #if {$HDMI == 1}
 #{
