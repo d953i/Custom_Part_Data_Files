@@ -16,10 +16,20 @@
 #
 ################################################################################
 
+#MEM_SPEED / MEM_PARTNUMBER can be set before sourcing this script to override the defaults below.
 #Need apply patch to Xilinx MIG before can enable DDR4-2666 speed for DIMM/UDIMM.
-set MEM_SPEED 2400
+if {![info exists MEM_SPEED]} { set MEM_SPEED 2400 }
+if {![info exists MEM_PARTNUMBER]} { set MEM_PARTNUMBER BLS4G4S26BFSD }
+#set MEM_PARTNUMBER MTA8ATF1G64HZ
+#Dual-rank SODIMM (M471A2K43BB1) is limited to DDR4-2133 on xczu7ev-2; MEM_SPEED is forced.
+#set MEM_PARTNUMBER M471A2K43BB1
+#set MEM_PARTNUMBER M471A5244CB0
 
-set ProjectName zcu104_ballistix
+if {$MEM_PARTNUMBER == "BLS4G4S26BFSD"} {
+    set ProjectName zcu104_ballistix
+} else {
+    set ProjectName zcu104_[string tolower $MEM_PARTNUMBER]
+}
 
 if {$MEM_SPEED == 2666} {
    append ProjectName $MEM_SPEED
@@ -48,8 +58,8 @@ set sourceRoot [join [lrange [file split [file dirname [info script]]] 0 end-2] 
 #puts stdout [join [lrange [file split [file dirname [info script]]] 0 end-2] "/"]
 #return -code 1
 
-if {[string compare [version -short] 2023.2] != 0} {
-    return -code error [format "This script is for Vivado version 2023.2!"]
+if {[lsearch -exact {2023.2 2025.2} [version -short]] < 0} {
+    return -code error [format "This script is for Vivado version 2023.2 or 2025.2!"]
 }
 
 create_project $ProjectName ./$ProjectName -part xczu7ev-ffvc1156-2-e
@@ -60,8 +70,48 @@ create_bd_design "bd"
 set_param synth.maxThreads 8
 set_param general.maxThreads 12
 
-import_files -norecurse $sourceRoot/Memory/Crutial_Ballistix_Sport/BLS4G4S26BFSD.csv
-import_files -norecurse $sourceRoot/Memory/Micron_MTA8ATF1G64HZ/MTA8ATF1G64HZ.csv
+set MEM_SPEED_STR 2400
+set MEM_ADDR_WIDTH 32
+if {$MEM_PARTNUMBER == "BLS4G4S26BFSD"} {
+    import_files -norecurse $sourceRoot/Memory/Crutial_Ballistix_Sport/BLS4G4S26BFSD.csv
+    if {$MEM_SPEED == "2666"} {
+        set MEM_SPEED_STR 2666
+    } else {
+        set MEM_SPEED 2400
+        set MEM_SPEED_STR 2400
+    }
+} elseif {$MEM_PARTNUMBER == "MTA8ATF1G64HZ"} {
+    import_files -norecurse $sourceRoot/Memory/Micron_MTA8ATF1G64HZ/MTA8ATF1G64HZ.csv
+    set MEM_ADDR_WIDTH 33
+    if {$MEM_SPEED == "2666"} {
+        set MEM_SPEED_STR 2G6
+    } else {
+        set MEM_SPEED 2400
+        set MEM_SPEED_STR 2G3
+    }
+} elseif {$MEM_PARTNUMBER == "M471A2K43BB1"} {
+    #Samsung 16GB dual-rank SODIMM, PC4-2133P (8Gb x8 K4A8G085WB components, 2 ranks).
+    import_files -norecurse $sourceRoot/Memory/Samsung_M471A2K43BB1/M471A2K43BB1.csv
+    set MEM_ADDR_WIDTH 34
+    if {$MEM_SPEED != 2133} {
+        puts "WARNING: $MEM_PARTNUMBER is a dual-rank PC4-2133 module; MEM_SPEED $MEM_SPEED -> 2133"
+        set MEM_SPEED 2133
+    }
+    set MEM_SPEED_STR CPB
+} elseif {$MEM_PARTNUMBER == "M471A5244CB0"} {
+    #Samsung 4GB single-rank SODIMM, PC4-2666V (8Gb x16 K4A8G165WC components, 1 rank).
+    import_files -norecurse $sourceRoot/Memory/Samsung_M471A5244CB0/M471A5244CB0.csv
+    if {$MEM_SPEED == "2666"} {
+        set MEM_SPEED_STR CTD
+    } elseif {$MEM_SPEED == "2400"} {
+        set MEM_SPEED_STR CRC
+    } else {
+        set MEM_SPEED 2133
+        set MEM_SPEED_STR CPB
+    }
+} else {
+    return -code error "Unknown MEM_PARTNUMBER $MEM_PARTNUMBER (BLS4G4S26BFSD, MTA8ATF1G64HZ, M471A2K43BB1 or M471A5244CB0)"
+}
 
 startgroup
 create_bd_cell -type ip -vlnv xilinx.com:ip:ddr4:2.2 ddr4_0
@@ -72,21 +122,24 @@ set_property name sodimm_refclk [get_bd_intf_ports C0_SYS_CLK_0]
 set_property CONFIG.FREQ_HZ 300000000 [get_bd_intf_ports /sodimm_refclk]
 endgroup
 
+set SODIMM [format %s-%s $MEM_PARTNUMBER $MEM_SPEED_STR]
+#Memory clock period (ps) and matching 300MHz sodimm_refclk period accepted by the DDR4 IP.
 if {$MEM_SPEED == 2666} {
-startgroup
-set_property -dict [list CONFIG.C0.DDR4_TimePeriod {750}] [get_bd_cells ddr4_0]
-set_property -dict [list CONFIG.C0.DDR4_CustomParts [lindex [get_files */BLS4G4S26BFSD.csv] 0] CONFIG.C0.DDR4_isCustom {true}] [get_bd_cells ddr4_0]
-set_property -dict [list CONFIG.C0.DDR4_MemoryType {SODIMMs} CONFIG.C0.DDR4_MemoryPart {BLS4G4S26BFSD-2666} CONFIG.C0.DDR4_DataWidth {64} CONFIG.C0.DDR4_AxiDataWidth {512} CONFIG.C0.DDR4_AxiAddressWidth {32}] [get_bd_cells ddr4_0]
-set_property -dict [list CONFIG.C0.DDR4_InputClockPeriod {3334}] [get_bd_cells ddr4_0]
-endgroup
+    set MEM_TCK 750
+    set MEM_REFCLK 3334
+} elseif {$MEM_SPEED == 2133} {
+    set MEM_TCK 938
+    set MEM_REFCLK 3335
 } else {
-startgroup
-set_property -dict [list CONFIG.C0.DDR4_TimePeriod {833}] [get_bd_cells ddr4_0]
-set_property -dict [list CONFIG.C0.DDR4_CustomParts [lindex [get_files */BLS4G4S26BFSD.csv] 0] CONFIG.C0.DDR4_isCustom {true}] [get_bd_cells ddr4_0]
-set_property -dict [list CONFIG.C0.DDR4_MemoryType {SODIMMs} CONFIG.C0.DDR4_MemoryPart {BLS4G4S26BFSD-2400} CONFIG.C0.DDR4_DataWidth {64} CONFIG.C0.DDR4_AxiDataWidth {512} CONFIG.C0.DDR4_AxiAddressWidth {32}] [get_bd_cells ddr4_0]
-set_property -dict [list CONFIG.C0.DDR4_InputClockPeriod {3332}] [get_bd_cells ddr4_0]
-endgroup
+    set MEM_TCK 833
+    set MEM_REFCLK 3332
 }
+startgroup
+set_property -dict [list CONFIG.C0.DDR4_TimePeriod $MEM_TCK] [get_bd_cells ddr4_0]
+set_property -dict [list CONFIG.C0.DDR4_CustomParts [lindex [get_files */$MEM_PARTNUMBER.csv] 0] CONFIG.C0.DDR4_isCustom {true}] [get_bd_cells ddr4_0]
+set_property -dict [list CONFIG.C0.DDR4_MemoryType {SODIMMs} CONFIG.C0.DDR4_MemoryPart ${SODIMM} CONFIG.C0.DDR4_DataWidth {64} CONFIG.C0.DDR4_AxiDataWidth {512} CONFIG.C0.DDR4_AxiAddressWidth ${MEM_ADDR_WIDTH}] [get_bd_cells ddr4_0]
+set_property -dict [list CONFIG.C0.DDR4_InputClockPeriod $MEM_REFCLK] [get_bd_cells ddr4_0]
+endgroup
 
 startgroup
 create_bd_cell -type ip -vlnv xilinx.com:ip:zynq_ultra_ps_e:3.5 zynq_ultra_ps_e_0
@@ -101,7 +154,9 @@ set_property -dict [list CONFIG.ADDN_UI_CLKOUT1_FREQ_HZ {100}] [get_bd_cells ddr
 endgroup
 
 assign_bd_address
-set_property range 4G [get_bd_addr_segs {zynq_ultra_ps_e_0/Data/SEG_ddr4_0_C0_DDR4_ADDRESS_BLOCK}]
+set_property range [expr {1 << ($MEM_ADDR_WIDTH - 30)}]G [get_bd_addr_segs {zynq_ultra_ps_e_0/Data/SEG_ddr4_0_C0_DDR4_ADDRESS_BLOCK}]
+#DDR4 base as seen by the PS: 0x4_0000_0000 for modules up to 4GB, 0x10_0000_0000 above.
+puts "DDR4 base address: [get_property OFFSET [get_bd_addr_segs {zynq_ultra_ps_e_0/Data/SEG_ddr4_0_C0_DDR4_ADDRESS_BLOCK}]]"
 
 add_files -fileset constrs_1 -norecurse $sourceRoot/Boards/Xilinx_ZCU104/ZCU104_SODIMM.xdc
 import_files -fileset constrs_1 $sourceRoot/Boards/Xilinx_ZCU104/ZCU104_SODIMM.xdc
