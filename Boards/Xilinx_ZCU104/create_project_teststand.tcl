@@ -16,11 +16,13 @@
 #
 ################################################################################
 
+#MEM_SPEED / MEM_PARTNUMBER can be set before sourcing this script to override the defaults below.
 #Need apply patch to Xilinx MIG before can enable DDR4-2666 speed for DIMM/UDIMM.
-set MEM_SPEED 2400
+if {![info exists MEM_SPEED]} { set MEM_SPEED 2400 }
 #set MEM_PARTNUMBER MTA8ATF1G64HZ
 #Dual-rank SODIMM (M471A2K43BB1) is limited to DDR4-2133 on xczu7ev-2; MEM_SPEED is forced.
-set MEM_PARTNUMBER M471A2K43BB1
+if {![info exists MEM_PARTNUMBER]} { set MEM_PARTNUMBER M471A2K43BB1 }
+#set MEM_PARTNUMBER M471A5244CB0
 #set MEM_PARTNUMBER BLS4G4S26BFSD
 set USE_JTAG2AXI 1
 #AXI4 bandwidth/data tester + VIO on the DDR4 UI clock, run with Scripts/ddr4_bw_test.tcl.
@@ -97,6 +99,20 @@ if {$::MEM_PARTNUMBER == "M471A2K43BB1"} {
         set MEM_SPEED 2133
     }
     set MEM_SPEED_STR CPB
+}
+
+#Samsung 4GB single-rank SODIMM, PC4-2666V (8Gb x16 K4A8G165WC components, 1 rank).
+if {$::MEM_PARTNUMBER == "M471A5244CB0"} {
+    import_files -norecurse $sourceRoot/Memory/Samsung_M471A5244CB0/M471A5244CB0.csv
+    set MEM_ADDR_WIDTH 32
+    if {$MEM_SPEED == "2666"} {
+        set MEM_SPEED_STR CTD
+    } elseif {$MEM_SPEED == "2400"} {
+        set MEM_SPEED_STR CRC
+    } else {
+        set MEM_SPEED 2133
+        set MEM_SPEED_STR CPB
+    }
 }
 
 update_ip_catalog
@@ -236,11 +252,6 @@ if {$USE_BWTEST == 1} {
     set N_SI [get_property CONFIG.NUM_SI [get_bd_cells axi_smc]]
     set_property CONFIG.NUM_SI [expr {$N_SI + 1}] [get_bd_cells axi_smc]
     connect_bd_intf_net [get_bd_intf_pins bwtest/m_axi] [get_bd_intf_pins axi_smc/[format S%02d_AXI $N_SI]]
-
-    #Same DDR4 window as the PS and JTAG-to-AXI: 0x10_0000_0000, whole module.
-    assign_bd_address -target_address_space [get_bd_addr_spaces bwtest/m_axi] \
-        [get_bd_addr_segs ddr4_pl/C0_DDR4_MEMORY_MAP/C0_DDR4_ADDRESS_BLOCK] \
-        -offset 0x1000000000 -range [expr {1 << ($MEM_ADDR_WIDTH - 30)}]G -force
 }
 
 #Set MicroSD clock to 50MHz
@@ -249,6 +260,15 @@ set_property -dict [list CONFIG.PSU__CRL_APB__SDIO1_REF_CTRL__FREQMHZ {50}] [get
 
 assign_bd_address
 set_property range [expr {1 << ($MEM_ADDR_WIDTH - 30)}]G [get_bd_addr_segs {zynq_ultra_ps_e_0/Data/SEG_ddr4_pl_C0_DDR4_ADDRESS_BLOCK}]
+#DDR4 base as seen by the PS (and JTAG-to-AXI): 0x4_0000_0000 for modules up to 4GB, 0x10_0000_0000 above.
+set DDR4_BASE [get_property OFFSET [get_bd_addr_segs {zynq_ultra_ps_e_0/Data/SEG_ddr4_pl_C0_DDR4_ADDRESS_BLOCK}]]
+puts "DDR4 base address: $DDR4_BASE (use -base $DDR4_BASE with Scripts/ddr4_bw_test.tcl)"
+if {$USE_BWTEST == 1} {
+    #Tester sees the whole module at the same address as the PS.
+    assign_bd_address -target_address_space [get_bd_addr_spaces bwtest/m_axi] \
+        [get_bd_addr_segs ddr4_pl/C0_DDR4_MEMORY_MAP/C0_DDR4_ADDRESS_BLOCK] \
+        -offset $DDR4_BASE -range [expr {1 << ($MEM_ADDR_WIDTH - 30)}]G -force
+}
 
 add_files -fileset constrs_1 -norecurse $sourceRoot/Boards/Xilinx_ZCU104/ZCU104_SODIMM.xdc
 import_files -fileset constrs_1 $sourceRoot/Boards/Xilinx_ZCU104/ZCU104_SODIMM.xdc

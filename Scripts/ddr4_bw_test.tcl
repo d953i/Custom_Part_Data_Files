@@ -169,7 +169,8 @@ if {$axi ne ""} {
         create_hw_axi_txn -force rd $axi -address [format %016llX [expr {$DDR + $a}]] -type read -len 2
         run_hw_axi -quiet rd
         set d [get_property DATA [get_hw_axi_txns rd]]
-        set w [expr {($a >> 3) & 0xFFFFFFFF}]
+        # pattern word = absolute address / 8 (the tester sees the same address as JTAG-to-AXI)
+        set w [expr {(($DDR + $a) >> 3) & 0xFFFFFFFF}]
         set exp [format %08X%08X%08X%08X [expr {(($w + 1) ^ 0x13579BDF) & 0xFFFFFFFF}] [expr {~($w + 1) & 0xFFFFFFFF}] [expr {($w ^ 0x13579BDF) & 0xFFFFFFFF}] [expr {~$w & 0xFFFFFFFF}]]
         set ok [string equal -nocase $d $exp]
         if {!$ok} { incr total_err }

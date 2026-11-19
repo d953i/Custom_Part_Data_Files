@@ -12,6 +12,7 @@ Tested with Vivado version 2019.2, 2022.1 & 2025.2
 - SODIMM Crutial Ballistix Sport BLS4G4S26BFSD  (CT40A512M8WE-75H component)  - 4GB
 - SODIMM Micron MTA8ATF1G64HZ (MT40A1G8WE-075E component) - 8GB
 - SODIMM Samsung M471A2K43BB1-CPB (K4A8G085WB-BCPB 8Gb component, dual-rank, PC4-2133) - 16GB
+- SODIMM Samsung M471A5244CB0-CTD (K4A8G165WC-BCTD 8Gb x16 component, single-rank, PC4-2666) - 4GB
   
 # Example design for Ballistix 4GB UDIMM's
 - Bittware CVP13
@@ -38,8 +39,32 @@ Tested 2026-11-19 with Vivado 2025.2 (DDR4 IP 2.2) on xczu7ev-ffvc1156-2-e, proj
 
 Theoretical peak at DDR4-2133 x64 is 17.06 GB/s (read reaches 88%).
 
-To repeat the test: build the teststand (`create_project_teststand.tcl` with `USE_BWTEST 1` adds the tester and its VIO behind the AXI SmartConnect, DDR4 at 0x10_0000_0000), then run from a shell with the board on JTAG:<br>
-```vivado -mode batch -source Scripts/ddr4_bw_test.tcl -tclargs -bit bd_wrapper.bit -ltx bd_wrapper.ltx -target 87210A -size_gb 16 -ui_ns 3.752```<br>
+# ZCU104 PL SODIMM test results (Samsung M471A5244CB0-CTD, 4GB single-rank x16)
+Tested 2026-11-19 with Vivado 2025.2 (DDR4 IP 2.2), same teststand with `MEM_PARTNUMBER M471A5244CB0` and `MEM_SPEED 2400` or `2666`.
+- 64-bit data, no ECC, four 8Gb x16 components (one bank group bit), DDR4 base address 0x4_0000_0000 (modules up to 4GB), same ODT/EQ settings as above.
+- DDR4-2400: part M471A5244CB0-CRC (tCK 833 ps, InputClockPeriod 3332, CL18/CWL12) - the DDR4 IP maximum for a single-rank SODIMM on -2.
+- DDR4-2666: part M471A5244CB0-CTD (tCK 750 ps, InputClockPeriod 3334, CL19/CWL14) - needs the MIG speed-limit patch (`Patches/xilinx_mig/time_periods.patch`; in Vivado 2025.2 the same line is line 584 of `data/ip/xilinx/mem_v1_4/csv/time_periods.csv`). This runs the -2 PL above AMD's supported DDR4 rate - use at your own risk.
+- Six expected critical warnings from ZCU104_SODIMM.xdc for the second-rank/BG1 pins this module does not use.
+- Data test at both speeds: full 4GB write + read-verify, two patterns, 0 data/response errors; JTAG-to-AXI spot reads match (two runs at 2666).
+
+|                                | DDR4-2400           | DDR4-2666           |
+|--------------------------------|---------------------|---------------------|
+| Timing (WNS / WHS)             | +0.144 / +0.010 ns  | +0.222 / +0.010 ns  |
+| Calibration                    | 17 stages pass      | 17 stages pass      |
+| Read margin complex / simple   | 39-48 / 48-65 taps  | 34-42 / 42-59 taps  |
+| UI clock                       | 300 MHz             | 333 MHz             |
+| Write / read, 64 / 32 beats    | 15.4 / 17.8 GB/s    | 17.2 / 19.8 GB/s    |
+| Write / read, 16 beats         | 15.4 / 17.5 GB/s    | 17.1 / 19.4 GB/s    |
+| Write / read, 8 beats          | 13.6 / 16.6 GB/s    | 15.1 / 18.4 GB/s    |
+| Write / read, 4 beats          | 10.6 / 14.7 GB/s    | 11.4 / 16.3 GB/s    |
+| Write / read, 2 beats          | 7.1 / 9.1 GB/s      | 7.9 / 10.2 GB/s     |
+| Write / read, 1 beat           | 4.6 / 4.6 GB/s      | 5.1 / 5.1 GB/s      |
+| Theoretical peak (x64)         | 19.2 GB/s (read 93%) | 21.3 GB/s (read 93%) |
+
+# Repeating the ZCU104 memory test
+Build the teststand: `create_project_teststand.tcl` with `USE_BWTEST 1` adds the tester and its VIO behind the AXI SmartConnect at the same DDR4 address as the PS (the script prints it: 0x4_0000_0000 for modules up to 4GB, 0x10_0000_0000 above). The module and speed can be chosen by setting `MEM_PARTNUMBER` / `MEM_SPEED` before sourcing the script. Then run from a shell with the board on JTAG, e.g. for the 16GB module:<br>
+```vivado -mode batch -source Scripts/ddr4_bw_test.tcl -tclargs -bit bd_wrapper.bit -ltx bd_wrapper.ltx -target 87210A -size_gb 16 -ui_ns 3.752 -base 0x1000000000```<br>
+and for the 4GB module: `-size_gb 4 -ui_ns 3.332 -base 0x400000000` at DDR4-2400, `-ui_ns 3.000` at DDR4-2666.<br>
 It prints the calibration result with per-rank margins, the full-size write/read-verify and bandwidth for burst lengths 64..1, then JTAG-to-AXI spot reads. `-ui_ns` is 4 x tCK (3.752 for DDR4-2133, 3.332 for 2400, 3.000 for 2666); `-bit` is optional (omit it to test the design already in the FPGA), `-target` is your JTAG cable serial.
 
 Note: if rank 1 fails DQS gate calibration ("Pattern not found on GT_STATUS, all samples were 0", rank 0 passes), reseat the SODIMM - rank 1 not answering at all was a socket contact problem on our board.
