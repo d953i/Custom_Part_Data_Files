@@ -43,7 +43,7 @@ Theoretical peak at DDR4-2133 x64 is 17.06 GB/s (read reaches 88%).
 Tested 2026-11-19 with Vivado 2025.2 (DDR4 IP 2.2), same teststand with `MEM_PARTNUMBER M471A5244CB0` and `MEM_SPEED 2400` or `2666`.
 - 64-bit data, no ECC, four 8Gb x16 components (one bank group bit), DDR4 base address 0x4_0000_0000 (modules up to 4GB), same ODT/EQ settings as above.
 - DDR4-2400: part M471A5244CB0-CRC (tCK 833 ps, InputClockPeriod 3332, CL18/CWL12) - the DDR4 IP maximum for a single-rank SODIMM on -2.
-- DDR4-2666: part M471A5244CB0-CTD (tCK 750 ps, InputClockPeriod 3334, CL19/CWL14) - needs the MIG speed-limit patch (`Patches/xilinx_mig/time_periods.patch`; in Vivado 2025.2 the same line is line 584 of `data/ip/xilinx/mem_v1_4/csv/time_periods.csv`). This runs the -2 PL above AMD's supported DDR4 rate - use at your own risk.
+- DDR4-2666: part M471A5244CB0-CTD (tCK 750 ps, InputClockPeriod 3334, CL19/CWL14) - needs the MIG speed-limit patch: `Patches/xilinx_mig/time_periods_2025.2.patch` for Vivado 2025.2 (apply from the Vivado install directory with `git apply -p1 <patch>` or `patch --binary -p1 -i <patch>`; see the file header), `Patches/xilinx_mig/time_periods.patch` for 2019.2. This runs the -2 PL above AMD's supported DDR4 rate - use at your own risk.
 - Six expected critical warnings from ZCU104_SODIMM.xdc for the second-rank/BG1 pins this module does not use.
 - Data test at both speeds: full 4GB write + read-verify, two patterns, 0 data/response errors; JTAG-to-AXI spot reads match (two runs at 2666).
 

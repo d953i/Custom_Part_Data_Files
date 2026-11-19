@@ -1,0 +1,2 @@
+# Applied to CRLF files in the Vivado install; must keep exact bytes (no EOL conversion).
+Patches/xilinx_mig/time_periods_2025.2.patch -text

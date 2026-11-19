@@ -1,0 +1,69 @@
+Vivado 2025.2 DDR4 IP (mem_v1_4) speed limit patch: allow DDR4-2666 (tCK 750 ps) instead of
+DDR4-2400 for single-rank DIMM/SODIMM (1 slot, 1 rank, DCI cascade off, bank group 1, Vnom) on
+UltraScale+ -2 E/I, -2L C/E/I and -3 E. This runs the PL above the DDR4 rate AMD supports for these
+speed grades - use at your own risk. Keep a copy of the original file before patching.
+
+Apply from the Vivado install directory (e.g. C:/AMDDesignTools/2025.2/Vivado), git-bash or Linux:
+    git apply -p1 <repo>/Patches/xilinx_mig/time_periods_2025.2.patch
+or
+    patch --binary -p1 -i <repo>/Patches/xilinx_mig/time_periods_2025.2.patch
+Undo with "git apply -R -p1 ..." / "patch --binary -R -p1 -i ...". The CSV uses CRLF line endings, so
+this file must keep its exact bytes (marked -text in .gitattributes); plain "patch" without --binary
+fails in git-bash on Windows.
+
+--- a/data/ip/xilinx/mem_v1_4/csv/time_periods.csv
++++ b/data/ip/xilinx/mem_v1_4/csv/time_periods.csv
+@@ -581,7 +581,7 @@
+ DDR4,DIMM,-2,E,Vnom,UltraScale,4,2,2,No,On,HP,Group 1,POD12,4:1,,,Full,Internal,No,,1333.33,1500,1600,,,,
+ DDR4,DIMM,-2,E,Vnom,UltraScale,4,2,2,No,On,HP,Group 2,POD12,4:1,,,Full,Internal,No,,1333.33,1500,1600,,,,
+ DDR4,DIMM,-2,E,Vnom,UltraScale,4,2,2,No,On,HP,Group 3,POD12,4:1,,,Full,Internal,No,,Too Slow,NA,1600,,,,
+-DDR4,DIMM,-2,E,Vnom,UltraScale+,1,1,1,No,Off,HP,Group 1,POD12,4:1,,,Full,Internal,No,,2400.00,833,1600,,,,
++DDR4,DIMM,-2,E,Vnom,UltraScale+,1,1,1,No,Off,HP,Group 1,POD12,4:1,,,Full,Internal,No,,2666.67,750,1600,,,,
+ DDR4,DIMM,-2,E,Vnom,UltraScale+,1,1,1,No,Off,HP,Group 2,POD12,4:1,,,Full,Internal,No,,2133.33,938,1600,,,,
+ DDR4,DIMM,-2,E,Vnom,UltraScale+,1,1,1,No,Off,HP,Group 3,POD12,4:1,,,Full,Internal,No,,1600.00,1250,1600,,,,
+ DDR4,DIMM,-2,E,Vnom,UltraScale+,1,1,1,No,On,HP,Group 1,POD12,4:1,,,Full,Internal,No,,2133.33,938,1600,,,,
+@@ -641,7 +641,7 @@
+ DDR4,DIMM,-2,I,Vnom,UltraScale,4,2,2,No,On,HP,Group 1,POD12,4:1,,,Full,Internal,No,,1333.33,1500,1600,,,,
+ DDR4,DIMM,-2,I,Vnom,UltraScale,4,2,2,No,On,HP,Group 2,POD12,4:1,,,Full,Internal,No,,1333.33,1500,1600,,,,
+ DDR4,DIMM,-2,I,Vnom,UltraScale,4,2,2,No,On,HP,Group 3,POD12,4:1,,,Full,Internal,No,,Too Slow,NA,1600,,,,
+-DDR4,DIMM,-2,I,Vnom,UltraScale+,1,1,1,No,Off,HP,Group 1,POD12,4:1,,,Full,Internal,No,,2400.00,833,1600,,,,
++DDR4,DIMM,-2,I,Vnom,UltraScale+,1,1,1,No,Off,HP,Group 1,POD12,4:1,,,Full,Internal,No,,2666.67,750,1600,,,,
+ DDR4,DIMM,-2,I,Vnom,UltraScale+,1,1,1,No,Off,HP,Group 2,POD12,4:1,,,Full,Internal,No,,2133.33,938,1600,,,,
+ DDR4,DIMM,-2,I,Vnom,UltraScale+,1,1,1,No,Off,HP,Group 3,POD12,4:1,,,Full,Internal,No,,1600.00,1250,1600,,,,
+ DDR4,DIMM,-2,I,Vnom,UltraScale+,1,1,1,No,On,HP,Group 1,POD12,4:1,,,Full,Internal,No,,2133.33,938,1600,,,,
+@@ -671,7 +671,7 @@
+ DDR4,DIMM,-2,I,Vnom,UltraScale+,4,2,2,No,On,HP,Group 1,POD12,4:1,,,Full,Internal,No,,1600.00,1250,1600,,,,
+ DDR4,DIMM,-2,I,Vnom,UltraScale+,4,2,2,No,On,HP,Group 2,POD12,4:1,,,Full,Internal,No,,1600.00,1250,1600,,,,
+ DDR4,DIMM,-2,I,Vnom,UltraScale+,4,2,2,No,On,HP,Group 3,POD12,4:1,,,Full,Internal,No,,1333.33,1500,1600,,,,
+-DDR4,DIMM,-2L,C,Vnom,UltraScale+,1,1,1,No,Off,HP,Group 1,POD12,4:1,,,Full,Internal,No,,2400.00,833,1600,,,,
++DDR4,DIMM,-2L,C,Vnom,UltraScale+,1,1,1,No,Off,HP,Group 1,POD12,4:1,,,Full,Internal,No,,2666.67,750,1600,,,,
+ DDR4,DIMM,-2L,C,Vnom,UltraScale+,1,1,1,No,Off,HP,Group 2,POD12,4:1,,,Full,Internal,No,,2133.33,938,1600,,,,
+ DDR4,DIMM,-2L,C,Vnom,UltraScale+,1,1,1,No,Off,HP,Group 3,POD12,4:1,,,Full,Internal,No,,1600.00,1250,1600,,,,
+ DDR4,DIMM,-2L,C,Vnom,UltraScale+,1,1,1,No,On,HP,Group 1,POD12,4:1,,,Full,Internal,No,,2133.33,938,1600,,,,
+@@ -731,7 +731,7 @@
+ DDR4,DIMM,-2L,C,Vlow,UltraScale+,4,2,2,No,On,HP,Group 1,POD12,4:1,,,Full,Internal,No,,1333.33,1500,1600,,,,
+ DDR4,DIMM,-2L,C,Vlow,UltraScale+,4,2,2,No,On,HP,Group 2,POD12,4:1,,,Full,Internal,No,,1333.33,1500,1600,,,,
+ DDR4,DIMM,-2L,C,Vlow,UltraScale+,4,2,2,No,On,HP,Group 3,POD12,4:1,,,Full,Internal,No,,Too Slow,NA,1600,,,,
+-DDR4,DIMM,-2L,E,Vnom,UltraScale+,1,1,1,No,Off,HP,Group 1,POD12,4:1,,,Full,Internal,No,,2400.00,833,1600,,,,
++DDR4,DIMM,-2L,E,Vnom,UltraScale+,1,1,1,No,Off,HP,Group 1,POD12,4:1,,,Full,Internal,No,,2666.67,750,1600,,,,
+ DDR4,DIMM,-2L,E,Vnom,UltraScale+,1,1,1,No,Off,HP,Group 2,POD12,4:1,,,Full,Internal,No,,2133.33,938,1600,,,,
+ DDR4,DIMM,-2L,E,Vnom,UltraScale+,1,1,1,No,Off,HP,Group 3,POD12,4:1,,,Full,Internal,No,,1600.00,1250,1600,,,,
+ DDR4,DIMM,-2L,E,Vnom,UltraScale+,1,1,1,No,On,HP,Group 1,POD12,4:1,,,Full,Internal,No,,2133.33,938,1600,,,,
+@@ -791,7 +791,7 @@
+ DDR4,DIMM,-2L,E,Vlow,UltraScale+,4,2,2,No,On,HP,Group 1,POD12,4:1,,,Full,Internal,No,,1333.33,1500,1600,,,,
+ DDR4,DIMM,-2L,E,Vlow,UltraScale+,4,2,2,No,On,HP,Group 2,POD12,4:1,,,Full,Internal,No,,1333.33,1500,1600,,,,
+ DDR4,DIMM,-2L,E,Vlow,UltraScale+,4,2,2,No,On,HP,Group 3,POD12,4:1,,,Full,Internal,No,,Too Slow,NA,1600,,,,
+-DDR4,DIMM,-2L,I,Vnom,UltraScale+,1,1,1,No,Off,HP,Group 1,POD12,4:1,,,Full,Internal,No,,2400.00,833,1600,,,,
++DDR4,DIMM,-2L,I,Vnom,UltraScale+,1,1,1,No,Off,HP,Group 1,POD12,4:1,,,Full,Internal,No,,2666.67,750,1600,,,,
+ DDR4,DIMM,-2L,I,Vnom,UltraScale+,1,1,1,No,Off,HP,Group 2,POD12,4:1,,,Full,Internal,No,,2133.33,938,1600,,,,
+ DDR4,DIMM,-2L,I,Vnom,UltraScale+,1,1,1,No,Off,HP,Group 3,POD12,4:1,,,Full,Internal,No,,1600.00,1250,1600,,,,
+ DDR4,DIMM,-2L,I,Vnom,UltraScale+,1,1,1,No,On,HP,Group 1,POD12,4:1,,,Full,Internal,No,,2133.33,938,1600,,,,
+@@ -881,7 +881,7 @@
+ DDR4,DIMM,-3,E,Vnom,UltraScale,4,2,2,No,On,HP,Group 1,POD12,4:1,,,Full,Internal,No,,1333.33,1500,1600,,,,
+ DDR4,DIMM,-3,E,Vnom,UltraScale,4,2,2,No,On,HP,Group 2,POD12,4:1,,,Full,Internal,No,,1333.33,1500,1600,,,,
+ DDR4,DIMM,-3,E,Vnom,UltraScale,4,2,2,No,On,HP,Group 3,POD12,4:1,,,Full,Internal,No,,Too Slow,NA,1600,,,,
+-DDR4,DIMM,-3,E,Vnom,UltraScale+,1,1,1,No,Off,HP,Group 1,POD12,4:1,,,Full,Internal,No,,2400.00,833,1600,,,,
++DDR4,DIMM,-3,E,Vnom,UltraScale+,1,1,1,No,Off,HP,Group 1,POD12,4:1,,,Full,Internal,No,,2666.67,750,1600,,,,
+ DDR4,DIMM,-3,E,Vnom,UltraScale+,1,1,1,No,Off,HP,Group 2,POD12,4:1,,,Full,Internal,No,,2133.33,938,1600,,,,
+ DDR4,DIMM,-3,E,Vnom,UltraScale+,1,1,1,No,Off,HP,Group 3,POD12,4:1,,,Full,Internal,No,,1600.00,1250,1600,,,,
+ DDR4,DIMM,-3,E,Vnom,UltraScale+,1,1,1,No,On,HP,Group 1,POD12,4:1,,,Full,Internal,No,,2133.33,938,1600,,,,
