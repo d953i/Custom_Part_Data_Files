@@ -17,9 +17,15 @@
 ################################################################################
 
 #MEM_SPEED / MEM_PARTNUMBER can be set before sourcing this script to override the defaults below.
+#The override applies to one run: both are cleared at the end, so a later run in the same Vivado session
+#(this script or create_project_teststand.tcl) starts from its own defaults again.
+#MEM_SPEED unset: the module's default speed (2400, or 2133 for the PC4-2133 modules).
 #Need apply patch to Xilinx MIG before can enable DDR4-2666 speed for DIMM/UDIMM.
-if {![info exists MEM_SPEED]} { set MEM_SPEED 2400 }
-if {![info exists MEM_PARTNUMBER]} { set MEM_PARTNUMBER BLS4G4S26BFSD }
+if {![info exists MEM_SPEED]} { set MEM_SPEED 0 }
+#Default: the SODIMM of AMD's ZCU104 board preset, Micron MTA8ATF51264HZ-2G1 (4GB single-rank x8,
+#DDR4-2133, part from Vivado's built-in DDR4 list; no CSV needed).
+if {![info exists MEM_PARTNUMBER]} { set MEM_PARTNUMBER MTA8ATF51264HZ }
+#set MEM_PARTNUMBER BLS4G4S26BFSD
 #set MEM_PARTNUMBER MTA8ATF1G64HZ
 #Dual-rank SODIMM (M471A2K43BB1) is limited to DDR4-2133 on xczu7ev-2; MEM_SPEED is forced.
 #set MEM_PARTNUMBER M471A2K43BB1
@@ -72,7 +78,16 @@ set_param general.maxThreads 12
 
 set MEM_SPEED_STR 2400
 set MEM_ADDR_WIDTH 32
-if {$MEM_PARTNUMBER == "BLS4G4S26BFSD"} {
+set MEM_CUSTOM 1
+if {$MEM_PARTNUMBER == "MTA8ATF51264HZ"} {
+    #AMD ZCU104 board preset SODIMM; Vivado lists it only as -2G1 (DDR4-2133).
+    set MEM_CUSTOM 0
+    if {$MEM_SPEED != 0 && $MEM_SPEED != 2133} {
+        puts "WARNING: $MEM_PARTNUMBER-2G1 is the DDR4-2133 board preset part; MEM_SPEED $MEM_SPEED -> 2133"
+    }
+    set MEM_SPEED 2133
+    set MEM_SPEED_STR 2G1
+} elseif {$MEM_PARTNUMBER == "BLS4G4S26BFSD"} {
     import_files -norecurse $sourceRoot/Memory/Crutial_Ballistix_Sport/BLS4G4S26BFSD.csv
     if {$MEM_SPEED == "2666"} {
         set MEM_SPEED_STR 2666
@@ -93,24 +108,24 @@ if {$MEM_PARTNUMBER == "BLS4G4S26BFSD"} {
     #Samsung 16GB dual-rank SODIMM, PC4-2133P (8Gb x8 K4A8G085WB components, 2 ranks).
     import_files -norecurse $sourceRoot/Memory/Samsung_M471A2K43BB1/M471A2K43BB1.csv
     set MEM_ADDR_WIDTH 34
-    if {$MEM_SPEED != 2133} {
+    if {$MEM_SPEED != 0 && $MEM_SPEED != 2133} {
         puts "WARNING: $MEM_PARTNUMBER is a dual-rank PC4-2133 module; MEM_SPEED $MEM_SPEED -> 2133"
-        set MEM_SPEED 2133
     }
+    set MEM_SPEED 2133
     set MEM_SPEED_STR CPB
 } elseif {$MEM_PARTNUMBER == "M471A5244CB0"} {
     #Samsung 4GB single-rank SODIMM, PC4-2666V (8Gb x16 K4A8G165WC components, 1 rank).
     import_files -norecurse $sourceRoot/Memory/Samsung_M471A5244CB0/M471A5244CB0.csv
     if {$MEM_SPEED == "2666"} {
         set MEM_SPEED_STR CTD
-    } elseif {$MEM_SPEED == "2400"} {
-        set MEM_SPEED_STR CRC
-    } else {
-        set MEM_SPEED 2133
+    } elseif {$MEM_SPEED == "2133"} {
         set MEM_SPEED_STR CPB
+    } else {
+        set MEM_SPEED 2400
+        set MEM_SPEED_STR CRC
     }
 } else {
-    return -code error "Unknown MEM_PARTNUMBER $MEM_PARTNUMBER (BLS4G4S26BFSD, MTA8ATF1G64HZ, M471A2K43BB1 or M471A5244CB0)"
+    return -code error "Unknown MEM_PARTNUMBER $MEM_PARTNUMBER (MTA8ATF51264HZ, BLS4G4S26BFSD, MTA8ATF1G64HZ, M471A2K43BB1 or M471A5244CB0)"
 }
 
 startgroup
@@ -136,7 +151,9 @@ if {$MEM_SPEED == 2666} {
 }
 startgroup
 set_property -dict [list CONFIG.C0.DDR4_TimePeriod $MEM_TCK] [get_bd_cells ddr4_0]
-set_property -dict [list CONFIG.C0.DDR4_CustomParts [lindex [get_files */$MEM_PARTNUMBER.csv] 0] CONFIG.C0.DDR4_isCustom {true}] [get_bd_cells ddr4_0]
+if {$MEM_CUSTOM} {
+    set_property -dict [list CONFIG.C0.DDR4_CustomParts [lindex [get_files */$MEM_PARTNUMBER.csv] 0] CONFIG.C0.DDR4_isCustom {true}] [get_bd_cells ddr4_0]
+}
 set_property -dict [list CONFIG.C0.DDR4_MemoryType {SODIMMs} CONFIG.C0.DDR4_MemoryPart ${SODIMM} CONFIG.C0.DDR4_DataWidth {64} CONFIG.C0.DDR4_AxiDataWidth {512} CONFIG.C0.DDR4_AxiAddressWidth ${MEM_ADDR_WIDTH}] [get_bd_cells ddr4_0]
 set_property -dict [list CONFIG.C0.DDR4_InputClockPeriod $MEM_REFCLK] [get_bd_cells ddr4_0]
 endgroup
@@ -164,4 +181,7 @@ import_files -fileset constrs_1 $sourceRoot/Boards/Xilinx_ZCU104/ZCU104_SODIMM.x
 make_wrapper -files [get_files ./$ProjectName/$ProjectName.srcs/sources_1/bd/bd/bd.bd] -top
 add_files -norecurse ./$ProjectName/$ProjectName.srcs/sources_1/bd/bd/hdl/bd_wrapper.v
 update_compile_order -fileset sources_1
+
+#One-run overrides (MEM_SPEED may also have been forced above, e.g. 2133 for the dual-rank module).
+unset -nocomplain MEM_SPEED MEM_PARTNUMBER
 

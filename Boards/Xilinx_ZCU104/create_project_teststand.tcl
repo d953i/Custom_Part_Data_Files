@@ -17,6 +17,8 @@
 ################################################################################
 
 #MEM_SPEED / MEM_PARTNUMBER can be set before sourcing this script to override the defaults below.
+#The override applies to one run: both are cleared at the end, so a later run in the same Vivado session
+#(this script or create_project.tcl) starts from its own defaults again.
 #Need apply patch to Xilinx MIG before can enable DDR4-2666 speed for DIMM/UDIMM.
 if {![info exists MEM_SPEED]} { set MEM_SPEED 2400 }
 #set MEM_PARTNUMBER MTA8ATF1G64HZ
@@ -287,4 +289,7 @@ import_files -fileset constrs_1 $sourceRoot/Boards/Xilinx_ZCU104/ZCU104_TESTSTAN
 make_wrapper -files [get_files ./$ProjectName/$ProjectName.srcs/sources_1/bd/bd/bd.bd] -top
 add_files -norecurse ./$ProjectName/$ProjectName.srcs/sources_1/bd/bd/hdl/bd_wrapper.v
 update_compile_order -fileset sources_1
+
+#One-run overrides (MEM_SPEED may also have been forced above, e.g. 2133 for the dual-rank module).
+unset -nocomplain MEM_SPEED MEM_PARTNUMBER
 
