@@ -24,11 +24,18 @@ if {![info exists MEM_SPEED]} { set MEM_SPEED 2400 }
 if {![info exists MEM_PARTNUMBER]} { set MEM_PARTNUMBER M471A2K43BB1 }
 #set MEM_PARTNUMBER M471A5244CB0
 #set MEM_PARTNUMBER BLS4G4S26BFSD
+
+#Design options: set to 1 to enable; a commented-out option is off. Cleared first so values left in the
+#Tcl interpreter by an earlier run of this script in the same Vivado session do not carry over.
+unset -nocomplain USE_JTAG2AXI USE_BWTEST USE_PMU POWER_BUTTON
 set USE_JTAG2AXI 1
 #AXI4 bandwidth/data tester + VIO on the DDR4 UI clock, run with Scripts/ddr4_bw_test.tcl.
-set USE_BWTEST 1
+#set USE_BWTEST 1
 set USE_PMU 1
 set POWER_BUTTON 1
+foreach opt {USE_JTAG2AXI USE_BWTEST USE_PMU POWER_BUTTON} {
+    if {![info exists $opt]} { set $opt 0 }
+}
 
 set ProjectName ZCU104_TESTSTAND
 
