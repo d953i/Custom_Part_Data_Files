@@ -1,28 +1,30 @@
 ###############################################################################
 #
-#  Copyright (c) 2001-2023 divashin@gmail.com
+#  Copyright (c) 2001-2026 divashin@gmail.com
 #
-#  This program is free software; you can redistribute it and/or modify
-#  it under the terms of the GNU General Public License as published by
-#  the Free Software Foundation; either version 2 of the License, or
-#  (at your option) any later version.
+#  Licensed under the Apache License, Version 2.0 (the "License");
+#  you may not use this file except in compliance with the License.
+#  You may obtain a copy of the License at
 #
-#  This program is distributed in the hope that it will be useful,
-#  but WITHOUT ANY WARRANTY; without even the implied warranty of
-#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#  GNU General Public License for more details.
+#      http://www.apache.org/licenses/LICENSE-2.0
 #
-#  You should have received a copy of the GNU General Public License along
-#  with this program; if not, write to the Free Software Foundation, Inc.,
-#  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+#  Unless required by applicable law or agreed to in writing, software
+#  distributed under the License is distributed on an "AS IS" BASIS,
+#  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#  See the License for the specific language governing permissions and
+#  limitations under the License.
 #
 ################################################################################
 
 #Need apply patch to Xilinx MIG before can enable DDR4-2666 speed for DIMM/UDIMM.
 set MEM_SPEED 2400
-set MEM_PARTNUMBER MTA8ATF1G64HZ
+#set MEM_PARTNUMBER MTA8ATF1G64HZ
+#Dual-rank SODIMM (M471A2K43BB1) is limited to DDR4-2133 on xczu7ev-2; MEM_SPEED is forced.
+set MEM_PARTNUMBER M471A2K43BB1
 #set MEM_PARTNUMBER BLS4G4S26BFSD
 set USE_JTAG2AXI 1
+#AXI4 bandwidth/data tester + VIO on the DDR4 UI clock, run with Scripts/ddr4_bw_test.tcl.
+set USE_BWTEST 1
 set USE_PMU 1
 set POWER_BUTTON 1
 
@@ -86,6 +88,17 @@ if {$::MEM_PARTNUMBER == "MTA8ATF1G64HZ"} {
     }
 }
 
+#Samsung 16GB dual-rank SODIMM, PC4-2133P (8Gb x8 K4A8G085WB components, 2 ranks).
+if {$::MEM_PARTNUMBER == "M471A2K43BB1"} {
+    import_files -norecurse $sourceRoot/Memory/Samsung_M471A2K43BB1/M471A2K43BB1.csv
+    set MEM_ADDR_WIDTH 34
+    if {$MEM_SPEED != 2133} {
+        puts "WARNING: $MEM_PARTNUMBER is a dual-rank PC4-2133 module; MEM_SPEED $MEM_SPEED -> 2133"
+        set MEM_SPEED 2133
+    }
+    set MEM_SPEED_STR CPB
+}
+
 update_ip_catalog
 update_compile_order -fileset sources_1
 
@@ -99,17 +112,21 @@ set_property CONFIG.FREQ_HZ 300000000 [get_bd_intf_ports /sodimm_refclk]
 endgroup
 
 set SODIMM [format %s-%s $MEM_PARTNUMBER $MEM_SPEED_STR]
+#Memory clock period (ps) and matching 300MHz sodimm_refclk period accepted by the DDR4 IP.
 if {$MEM_SPEED == 2666} {
-    set_property -dict [list CONFIG.C0.DDR4_TimePeriod {750}] [get_bd_cells ddr4_pl]
-    set_property -dict [list CONFIG.C0.DDR4_CustomParts [lindex [get_files */$MEM_PARTNUMBER.csv] 0] CONFIG.C0.DDR4_isCustom {true}] [get_bd_cells ddr4_pl]
-    set_property -dict [list CONFIG.C0.DDR4_MemoryType {SODIMMs} CONFIG.C0.DDR4_MemoryPart ${SODIMM} CONFIG.C0.DDR4_DataWidth {64} CONFIG.C0.DDR4_AxiDataWidth {512} CONFIG.C0.DDR4_AxiAddressWidth ${MEM_ADDR_WIDTH}] [get_bd_cells ddr4_pl]
-    set_property -dict [list CONFIG.C0.DDR4_InputClockPeriod {3334}] [get_bd_cells ddr4_pl]
+    set MEM_TCK 750
+    set MEM_REFCLK 3334
+} elseif {$MEM_SPEED == 2133} {
+    set MEM_TCK 938
+    set MEM_REFCLK 3335
 } else {
-    set_property -dict [list CONFIG.C0.DDR4_TimePeriod {833}] [get_bd_cells ddr4_pl]
-    set_property -dict [list CONFIG.C0.DDR4_CustomParts [lindex [get_files */$MEM_PARTNUMBER.csv] 0] CONFIG.C0.DDR4_isCustom {true}] [get_bd_cells ddr4_pl]
-    set_property -dict [list CONFIG.C0.DDR4_MemoryType {SODIMMs} CONFIG.C0.DDR4_MemoryPart ${SODIMM} CONFIG.C0.DDR4_DataWidth {64} CONFIG.C0.DDR4_AxiDataWidth {512} CONFIG.C0.DDR4_AxiAddressWidth ${MEM_ADDR_WIDTH}] [get_bd_cells ddr4_pl]
-    set_property -dict [list CONFIG.C0.DDR4_InputClockPeriod {3332}] [get_bd_cells ddr4_pl]
+    set MEM_TCK 833
+    set MEM_REFCLK 3332
 }
+set_property -dict [list CONFIG.C0.DDR4_TimePeriod $MEM_TCK] [get_bd_cells ddr4_pl]
+set_property -dict [list CONFIG.C0.DDR4_CustomParts [lindex [get_files */$MEM_PARTNUMBER.csv] 0] CONFIG.C0.DDR4_isCustom {true}] [get_bd_cells ddr4_pl]
+set_property -dict [list CONFIG.C0.DDR4_MemoryType {SODIMMs} CONFIG.C0.DDR4_MemoryPart ${SODIMM} CONFIG.C0.DDR4_DataWidth {64} CONFIG.C0.DDR4_AxiDataWidth {512} CONFIG.C0.DDR4_AxiAddressWidth ${MEM_ADDR_WIDTH}] [get_bd_cells ddr4_pl]
+set_property -dict [list CONFIG.C0.DDR4_InputClockPeriod $MEM_REFCLK] [get_bd_cells ddr4_pl]
 
 startgroup
 create_bd_cell -type ip -vlnv xilinx.com:ip:zynq_ultra_ps_e:3.5 zynq_ultra_ps_e_0
@@ -149,7 +166,7 @@ if {$USE_JTAG2AXI == 1} {
     set_property -dict [list CONFIG.NUM_SI [expr {$N_MI + 1}]] [get_bd_cells axi_smc]
 
     connect_bd_net [get_bd_pins ddr4_pl/c0_ddr4_ui_clk] [get_bd_pins jtag2axi/aclk]
-    connect_bd_net [get_bd_pins rst_ddr4_pl_300M/peripheral_aresetn] [get_bd_pins jtag2axi/aresetn]
+    connect_bd_net [get_bd_pins rst_ddr4_pl_*/peripheral_aresetn] [get_bd_pins jtag2axi/aresetn]
     connect_bd_intf_net [get_bd_intf_pins jtag2axi/M_AXI] [get_bd_intf_pins axi_smc/S01_AXI]
 }
 
@@ -171,7 +188,7 @@ if {$USE_PMU == 1} {
             
         create_bd_cell -type module -reference pmu_io PMU_IO
         connect_bd_net [get_bd_pins ddr4_pl/c0_ddr4_ui_clk] [get_bd_pins PMU_IO/CLOCK]
-        connect_bd_net [get_bd_pins rst_ddr4_pl_300M/peripheral_aresetn] [get_bd_pins PMU_IO/RESETN]
+        connect_bd_net [get_bd_pins rst_ddr4_pl_*/peripheral_aresetn] [get_bd_pins PMU_IO/RESETN]
 
         connect_bd_net [get_bd_pins zynq_ultra_ps_e_0/pmu_pl_gpo] [get_bd_pins PMU_IO/PMU_GPO]
         connect_bd_net [get_bd_pins PMU_IO/PMU_GPI] [get_bd_pins zynq_ultra_ps_e_0/pl_pmu_gpi]
@@ -185,12 +202,53 @@ if {$USE_PMU == 1} {
     }
 }
 
+if {$USE_BWTEST == 1} {
+
+    add_files -norecurse $sourceRoot/Boards/Xilinx_ZCU104/teststand_axi_bw_test.v
+    update_compile_order -fileset sources_1
+
+    create_bd_cell -type module -reference axi_bw_test bwtest
+    set_property CONFIG.ADDR_W 40 [get_bd_cells bwtest]
+
+    #VIO probes: out start, mode, base, length, burst_len, seed / in busy, done, cycles, errors, err_addr, resp_errors
+    create_bd_cell -type ip -vlnv xilinx.com:ip:vio:3.0 vio_bw
+    set_property -dict [list CONFIG.C_NUM_PROBE_OUT {6} CONFIG.C_NUM_PROBE_IN {6} CONFIG.C_EN_PROBE_IN_ACTIVITY {0} \
+        CONFIG.C_PROBE_OUT0_WIDTH {1} CONFIG.C_PROBE_OUT1_WIDTH {1} CONFIG.C_PROBE_OUT2_WIDTH {41} \
+        CONFIG.C_PROBE_OUT3_WIDTH {41} CONFIG.C_PROBE_OUT4_WIDTH {8} CONFIG.C_PROBE_OUT5_WIDTH {32} \
+        CONFIG.C_PROBE_IN0_WIDTH {1} CONFIG.C_PROBE_IN1_WIDTH {1} CONFIG.C_PROBE_IN2_WIDTH {48} \
+        CONFIG.C_PROBE_IN3_WIDTH {32} CONFIG.C_PROBE_IN4_WIDTH {41} CONFIG.C_PROBE_IN5_WIDTH {16}] [get_bd_cells vio_bw]
+
+    connect_bd_net [get_bd_pins ddr4_pl/c0_ddr4_ui_clk] [get_bd_pins bwtest/aclk]
+    connect_bd_net [get_bd_pins ddr4_pl/c0_ddr4_ui_clk] [get_bd_pins vio_bw/clk]
+    connect_bd_net [get_bd_pins rst_ddr4_pl_*/peripheral_aresetn] [get_bd_pins bwtest/aresetn]
+
+    set i 0
+    foreach p {start mode base length burst_len seed} {
+        connect_bd_net [get_bd_pins vio_bw/probe_out$i] [get_bd_pins bwtest/$p]
+        incr i
+    }
+    set i 0
+    foreach p {busy done cycles errors err_addr resp_errors} {
+        connect_bd_net [get_bd_pins bwtest/$p] [get_bd_pins vio_bw/probe_in$i]
+        incr i
+    }
+
+    set N_SI [get_property CONFIG.NUM_SI [get_bd_cells axi_smc]]
+    set_property CONFIG.NUM_SI [expr {$N_SI + 1}] [get_bd_cells axi_smc]
+    connect_bd_intf_net [get_bd_intf_pins bwtest/m_axi] [get_bd_intf_pins axi_smc/[format S%02d_AXI $N_SI]]
+
+    #Same DDR4 window as the PS and JTAG-to-AXI: 0x10_0000_0000, whole module.
+    assign_bd_address -target_address_space [get_bd_addr_spaces bwtest/m_axi] \
+        [get_bd_addr_segs ddr4_pl/C0_DDR4_MEMORY_MAP/C0_DDR4_ADDRESS_BLOCK] \
+        -offset 0x1000000000 -range [expr {1 << ($MEM_ADDR_WIDTH - 30)}]G -force
+}
+
 #Set MicroSD clock to 50MHz
 set_property -dict [list CONFIG.PSU__CRL_APB__SDIO1_REF_CTRL__FREQMHZ {50}] [get_bd_cells zynq_ultra_ps_e_0]
 
 
 assign_bd_address
-set_property range 8G [get_bd_addr_segs {zynq_ultra_ps_e_0/Data/SEG_ddr4_pl_C0_DDR4_ADDRESS_BLOCK}]
+set_property range [expr {1 << ($MEM_ADDR_WIDTH - 30)}]G [get_bd_addr_segs {zynq_ultra_ps_e_0/Data/SEG_ddr4_pl_C0_DDR4_ADDRESS_BLOCK}]
 
 add_files -fileset constrs_1 -norecurse $sourceRoot/Boards/Xilinx_ZCU104/ZCU104_SODIMM.xdc
 import_files -fileset constrs_1 $sourceRoot/Boards/Xilinx_ZCU104/ZCU104_SODIMM.xdc
