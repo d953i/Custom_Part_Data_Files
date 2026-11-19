@@ -9,7 +9,7 @@ Tested with Vivado version 2019.2, 2022.1 & 2025.2
 - UDIMM  Crutial Ballistix Sport BLS4G4D240FSB  (CT40A512M8RH-075E component) - 4GB
 - UDIMM  Crutial Ballistix Sport BLS8G4D240FSB  (CT40A512M8RH-075E component) - 8GB
 - UDIMM  Crutial Ballistix Sport BLS16G4D26BFSB (CT40A1G8WE-75H:D  component) - 16GB
-- SODIMM Crutial Ballistix Sport BLS4G4S26BFSD  (CT40A512M8WE-75H component)  - 4GB
+- SODIMM Crutial Ballistix Sport BLS4G4S26BFSD  (CT40A512M8WE-75H 4Gb x8 component, single-rank, PC4-2666 CL16-18-18) - 4GB
 - SODIMM Micron MTA8ATF1G64HZ (MT40A1G8WE-075E component) - 8GB
 - SODIMM Samsung M471A2K43BB1-CPB (K4A8G085WB-BCPB 8Gb component, dual-rank, PC4-2133) - 16GB
 - SODIMM Samsung M471A5244CB0-CTD (K4A8G165WC-BCTD 8Gb x16 component, single-rank, PC4-2666) - 4GB
@@ -61,10 +61,32 @@ Tested 2026-11-19 with Vivado 2025.2 (DDR4 IP 2.2), same teststand with `MEM_PAR
 | Write / read, 1 beat           | 4.6 / 4.6 GB/s      | 5.1 / 5.1 GB/s      |
 | Theoretical peak (x64)         | 19.2 GB/s (read 93%) | 21.3 GB/s (read 93%) |
 
+# ZCU104 PL SODIMM test results (Crucial Ballistix Sport LT BLS4G4S26BFSD, 4GB single-rank x8)
+Tested 2026-11-19 with Vivado 2025.2 (DDR4 IP 2.2), same teststand with `MEM_PARTNUMBER BLS4G4S26BFSD` and `MEM_SPEED 2666`.
+- 64-bit data, no ECC, eight 4Gb x8 components (four bank groups), DDR4 base address 0x4_0000_0000, same ODT/EQ settings as above.
+- DDR4-2666: part BLS4G4S26BFSD-2666 (tCK 750 ps, InputClockPeriod 3334, CL16/CWL14, tRCD/tRP 13.5 ns = Crucial's 16-18-18 rating) - needs the same MIG speed-limit patch as above.
+- `BLS4G4S26BFSD.csv` timings corrected for this test: component density 4Gb, tFAW 21 ns, tRCD/tRP 13.5 ns (2400/2666), CL16 at 2666, tRRD_S/L 3.7/5.3 ns at 2133.
+- Five expected critical warnings from ZCU104_SODIMM.xdc for the second-rank pins this module does not use.
+- Timing: WNS +0.167 ns, WHS +0.010 ns.
+- Calibration: 17 stages pass, read margin 36-43 taps (complex pattern), 48-55 taps (simple pattern).
+- Data test: full 4GB write + read-verify, two patterns, 0 data/response errors; JTAG-to-AXI spot reads match. Bandwidth on the 333 MHz UI clock:
+
+| AXI burst length | Write     | Read      |
+|------------------|-----------|-----------|
+| 64 beats         | 19.3 GB/s | 20.1 GB/s |
+| 32 beats         | 19.0 GB/s | 20.1 GB/s |
+| 16 beats         | 17.6 GB/s | 19.7 GB/s |
+| 8 beats          | 15.3 GB/s | 18.6 GB/s |
+| 4 beats          | 11.4 GB/s | 16.5 GB/s |
+| 2 beats          | 8.0 GB/s  | 10.3 GB/s |
+| 1 beat           | 5.2 GB/s  | 5.2 GB/s  |
+
+Theoretical peak at DDR4-2666 x64 is 21.3 GB/s (read reaches 94%). Writes are about 2 GB/s faster than with the x16 Samsung module at the same speed (four bank groups instead of two).
+
 # Repeating the ZCU104 memory test
 Build the teststand: `create_project_teststand.tcl` with `USE_BWTEST 1` adds the tester and its VIO behind the AXI SmartConnect at the same DDR4 address as the PS (the script prints it: 0x4_0000_0000 for modules up to 4GB, 0x10_0000_0000 above). The module and speed can be chosen by setting `MEM_PARTNUMBER` / `MEM_SPEED` before sourcing the script. Then run from a shell with the board on JTAG, e.g. for the 16GB module:<br>
 ```vivado -mode batch -source Scripts/ddr4_bw_test.tcl -tclargs -bit bd_wrapper.bit -ltx bd_wrapper.ltx -target 87210A -size_gb 16 -ui_ns 3.752 -base 0x1000000000```<br>
-and for the 4GB module: `-size_gb 4 -ui_ns 3.332 -base 0x400000000` at DDR4-2400, `-ui_ns 3.000` at DDR4-2666.<br>
+and for the 4GB modules: `-size_gb 4 -ui_ns 3.332 -base 0x400000000` at DDR4-2400, `-ui_ns 3.000` at DDR4-2666.<br>
 It prints the calibration result with per-rank margins, the full-size write/read-verify and bandwidth for burst lengths 64..1, then JTAG-to-AXI spot reads. `-ui_ns` is 4 x tCK (3.752 for DDR4-2133, 3.332 for 2400, 3.000 for 2666); `-bit` is optional (omit it to test the design already in the FPGA), `-target` is your JTAG cable serial.
 
 Note: if rank 1 fails DQS gate calibration ("Pattern not found on GT_STATUS, all samples were 0", rank 0 passes), reseat the SODIMM - rank 1 not answering at all was a socket contact problem on our board.
